@@ -1,0 +1,108 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+/* Structure with left, right pointers */
+struct node
+{
+    char path[100];
+    struct node *left;
+    struct node *right;
+};
+
+typedef struct node NODE;
+
+/* Function Declarations */
+NODE* insert(NODE *root, char path[]);
+NODE* search(NODE *root, char path[]);
+void inorder(NODE *root);
+NODE* deleteNode(NODE *root, char path[]);
+
+/* Insert Node */
+NODE* insert(NODE *root, char path[])
+{
+    NODE *newnode = (NODE*)malloc(sizeof(NODE));
+
+    strcpy(newnode->path, path);
+    newnode->left = newnode->right = NULL;
+
+    if (root == NULL)
+        return newnode;
+
+    if (strcmp(path, root->path) < 0)
+        root->left = insert(root->left, path);
+    else
+        root->right = insert(root->right, path);
+
+    return root;
+}
+
+/* Search Node */
+NODE* search(NODE *root, char path[])
+{
+    if (root == NULL || strcmp(root->path, path) == 0)
+        return root;
+
+    if (strcmp(path, root->path) < 0)
+        return search(root->left, path);
+
+    return search(root->right, path);
+}
+
+/* Inorder Traversal (Display Final Tree) */
+void inorder(NODE *root)
+{
+    if (root != NULL)
+    {
+        inorder(root->left);
+        printf("%s\n", root->path);
+        inorder(root->right);
+    }
+}
+
+/* Delete Node (simple case) */
+NODE* deleteNode(NODE *root, char path[])
+{
+    if (root == NULL)
+        return root;
+
+    if (strcmp(path, root->path) < 0)
+        root->left = deleteNode(root->left, path);
+    else if (strcmp(path, root->path) > 0)
+        root->right = deleteNode(root->right, path);
+    else
+    {
+        printf("Deleted: %s\n", root->path);
+        free(root);
+        return NULL;
+    }
+
+    return root;
+}
+
+/* Main Function */
+int main()
+{
+    NODE *root = NULL;
+
+    /* Insert files (like adding to system) */
+    root = insert(root, "C Program/trees.c");
+    root = insert(root, "folder/newfile.c");
+    root = insert(root, "C Prog/linkedlist.c");
+
+    /* Search */
+    NODE *result = search(root, "C Program/trees.c");
+    if (result != NULL)
+        printf("File found: %s\n", result->path);
+    else
+        printf("File not found\n");
+
+    /* Delete */
+    root = deleteNode(root, "C Prog/linkedlist.c");
+
+    /* Display Final Tree */
+    printf("\nFinal Tree (Inorder):\n");
+    inorder(root);
+
+    return 0;
+}
